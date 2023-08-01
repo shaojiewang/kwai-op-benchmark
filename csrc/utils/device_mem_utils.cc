@@ -1,8 +1,4 @@
-#include <hip/hip_runtime.h>
-#include <hip/hip_fp16.h>
-
 #include "csrc/utils/device_mem_utils.h"
-#include "csrc/utils/device_utils.h"
 
 template<typename T>
 void deviceMalloc(T** ptr, size_t size){
@@ -10,6 +6,14 @@ void deviceMalloc(T** ptr, size_t size){
     device_check_error(hipMalloc(ptr, sizeof(T) * size));
 #endif
 }
+
+template void deviceMalloc(float** ptr, size_t size);
+template void deviceMalloc(half** ptr, size_t size);
+template void deviceMalloc(uint16_t** ptr, size_t size);
+template void deviceMalloc(int** ptr, size_t size);
+template void deviceMalloc(bool** ptr, size_t size);
+template void deviceMalloc(char** ptr, size_t size);
+template void deviceMalloc(int8_t** ptr, size_t size);
 
 template<typename T>
 void deviceFree(T*& ptr){
@@ -20,4 +24,7 @@ void deviceFree(T*& ptr){
         ptr == nullptr;
     }
 }
+
+template void deviceFree(float*& ptr);
+template void deviceFree(half*& ptr);
 

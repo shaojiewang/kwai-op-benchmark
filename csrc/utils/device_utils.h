@@ -1,4 +1,7 @@
+#pragma once
+
 #include <hip/hip_runtime.h>
+#include <hip/hip_fp16.h>
 
 #if defined(__HIPCC__)
 static const char* _deviceGetErrorEnum(hipError_t error)
@@ -16,4 +19,4 @@ void check(T result, char const* const func, const char* const file, int const l
     }
 }
 
-#define check_device_error(val) check((val), #val, __FILE__, __LINE__)
+#define device_check_error(val) check((val), #val, __FILE__, __LINE__)

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <iostream>
+
 #include "csrc/utils/device_mem_utils.h"
 
 
@@ -23,15 +24,15 @@ int main(int argc, char* argv[]){
     int64_t size_A = M * K, size_B = K * N, size_C = M * N, size_Bias = N, size_Gain = N;
 
     half *d_A_fp16, *d_B_fp16, *d_C_fp16, *d_Bias_fp16, *d_Gain_fp16;
-    device_check_error(deviceMalloc((void**)&d_A_fp16, size_A * sizeof(half)));
-    device_check_error(deviceMalloc((void**)&d_B_fp16, size_B * sizeof(half)));
-    device_check_error(deviceMalloc((void**)&d_C_fp16, size_C * sizeof(half)));
+    deviceMalloc(&d_A_fp16, size_A);
+    deviceMalloc(&d_B_fp16, size_B);
+    deviceMalloc(&d_C_fp16, size_C);
 
 
 
-    device_check_error(deviceFree(d_A_fp16));
-    device_check_error(deviceFree(d_B_fp16));
-    device_check_error(deviceFree(d_C_fp16));
+    deviceFree(d_A_fp16);
+    deviceFree(d_B_fp16);
+    deviceFree(d_C_fp16);
 
 
     std::cout << "gemv test" << std::endl;

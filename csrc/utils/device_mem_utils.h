@@ -1,6 +1,7 @@
 
 #pragma once
-#include <hip/hip_runtime.h>
+#include "csrc/utils/device_utils.h"
+
 
 template<typename T>
 void deviceMalloc(T** ptr, size_t size);
