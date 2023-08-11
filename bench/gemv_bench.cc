@@ -4,6 +4,9 @@
 #include "csrc/utils/device_mem_utils.h"
 #include "csrc/utils/data_generator.h"
 
+#include "csrc/ops/gemv/rocblas_traits.h"
+#include "csrc/ops/gemv/hipblaslt_traits.h"
+
 int main(int argc, char* argv[]){
 
     if(argc <= 3){
@@ -41,13 +44,24 @@ int main(int argc, char* argv[]){
       memset(h_C_rocblas_fp16, 0, size_C * sizeof(half));
     }
 
-    // TGemm<half> gemm_fp16(M, N, K, d_A_fp16, d_B_fp16, d_C_fp16, transA, transB);
-    // call_rocBLAS(gemm_fp16, h_C_rocblas_fp16);
+    half* h_C_hipblaslt_fp16 = (half*)malloc(size_C * sizeof(half));
+    if (h_C_hipblaslt_fp16 == nullptr) {
+      printf("h_C_blaslt_fp16 is nullptr. \n");
+    } else {
+      memset(h_C_hipblaslt_fp16, 0, size_C * sizeof(half));
+    }
+
+    TGemm<half> gemm_fp16(M, N, K, d_A_fp16, d_B_fp16, d_C_fp16, transA, transB);
+    call_rocBLAS(gemm_fp16, h_C_rocblas_fp16);
+    call_hipblaslt(gemm_fp16, h_C_hipblaslt_fp16);
 
 
     deviceFree(d_A_fp16);
     deviceFree(d_B_fp16);
     deviceFree(d_C_fp16);
+
+    free(h_C_rocblas_fp16);
+    free(h_C_hipblaslt_fp16);
 
 
     std::cout << "gemv test" << std::endl;

@@ -12,11 +12,6 @@
 #include <hiprand.h>
 #endif
 
-
-
-constexpr int NUM_ITERATIONS = 10;
-constexpr int NUM_THREADS_PER_BLOCK = 256;
-
 #ifdef USE_HIPRAND
 #define HIPRAND_CHECK(status)                                    \
   {                                                             \
