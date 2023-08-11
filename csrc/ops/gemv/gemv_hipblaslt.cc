@@ -52,13 +52,13 @@ void call_hipblaslt(TGemm<T>& gemm, T* h_C_hipblaslt) {
     
     
     // Create descriptors for the original matrices
-    hipblasLtMatrixLayoutCreate(&Adesc, Atype_, transa == HIPBLAS_OP_N ? m : k, transa == HIPBLAS_OP_N ? k : m, lda);
-    hipblasLtMatrixLayoutCreate(&Bdesc, Btype_, transb == HIPBLAS_OP_N ? k : n, transb == HIPBLAS_OP_N ? n : k, ldb);
-    hipblasLtMatrixLayoutCreate(&Cdesc, Ctype_, m, n, ldc);
+    hipblasLtMatrixLayoutCreate(&Adesc, Atype_, transa == HIPBLAS_OP_N ? k : m, transa == HIPBLAS_OP_N ? m : k, lda);
+    hipblasLtMatrixLayoutCreate(&Bdesc, Btype_, transb == HIPBLAS_OP_N ? n : k, transb == HIPBLAS_OP_N ? k : n, ldb);
+    hipblasLtMatrixLayoutCreate(&Cdesc, Ctype_, n, m, ldc);
  
     hipblasLtMatmulDescCreate(&operationDesc, computeType, scaleType);
-    hipblasLtMatmulDescSetAttribute(operationDesc, HIPBLASLT_MATMUL_DESC_TRANSA, &transa, sizeof(hipblasOperation_t));
-    hipblasLtMatmulDescSetAttribute(operationDesc, HIPBLASLT_MATMUL_DESC_TRANSB, &transb, sizeof(hipblasOperation_t));
+    hipblasLtMatmulDescSetAttribute(operationDesc, HIPBLASLT_MATMUL_DESC_TRANSA, &transb, sizeof(hipblasOperation_t));
+    hipblasLtMatmulDescSetAttribute(operationDesc, HIPBLASLT_MATMUL_DESC_TRANSB, &transa, sizeof(hipblasOperation_t));
 
     hipblasLtMatmulAlgo_t algo;
     int                   workspaceSize = kHipBlasLtMaxWorkSpaceSizeInBytes; 
@@ -75,8 +75,8 @@ void call_hipblaslt(TGemm<T>& gemm, T* h_C_hipblaslt) {
     int ret_algo_count = 0;
     HIPBLASLT_CHECK(hipblasLtMatmulAlgoGetHeuristic(handle,
                                                      operationDesc,
-                                                     Adesc,
                                                      Bdesc,
+                                                     Adesc,
                                                      Cdesc,
                                                      Cdesc,
                                                      pref,
@@ -84,7 +84,7 @@ void call_hipblaslt(TGemm<T>& gemm, T* h_C_hipblaslt) {
                                                      heuristic_result,
                                                      &ret_algo_count));
 
-    assert(ret_algo_count > 0);  
+    assert(ret_algo_count > 0); 
     algo = heuristic_result[0].algo;
     hipblasLtMatmulPreferenceDestroy(pref); 
 
@@ -103,10 +103,10 @@ void call_hipblaslt(TGemm<T>& gemm, T* h_C_hipblaslt) {
         HIPBLASLT_CHECK(hipblasLtMatmul(handle,
                        operationDesc,
                        alpha,
-                       gemm.A,
-                       Adesc,
                        gemm.B,
                        Bdesc,
+                       gemm.A,
+                       Adesc,
                        beta,
                        gemm.C,
                        Cdesc,
@@ -116,6 +116,7 @@ void call_hipblaslt(TGemm<T>& gemm, T* h_C_hipblaslt) {
                        workSpace,
                        workspaceSize,
                        0));
+
         device_check_error(hipEventRecord(stop));       
         device_check_error(hipEventSynchronize(stop));
 
