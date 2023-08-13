@@ -94,6 +94,26 @@ void call_hipblaslt(TGemm<T>& gemm, T* h_C_hipblaslt) {
 
     printf("m=%d, n=%d, k=%d, lda=%d, ldb=%d, ldc=%d, wss=%d\n",
         m, n, k, lda, ldb, ldc, workspaceSize);
+
+    // warm up
+    for(int i = 0; i < NUM_ITERATIONS; i++){
+        HIPBLASLT_CHECK(hipblasLtMatmul(handle,
+                       operationDesc,
+                       alpha,
+                       gemm.B,
+                       Bdesc,
+                       gemm.A,
+                       Adesc,
+                       beta,
+                       gemm.C,
+                       Cdesc,
+                       gemm.C,
+                       Cdesc,
+                       &algo,
+                       workSpace,
+                       workspaceSize,
+                       0));
+    }
     
     float total_time = 0.0f;
     for (int i = 0; i < NUM_ITERATIONS; ++i) {
@@ -123,6 +143,7 @@ void call_hipblaslt(TGemm<T>& gemm, T* h_C_hipblaslt) {
         float time = 0.0f;
         device_check_error(hipEventElapsedTime(&time, start, stop));
         total_time += time;
+        printf("%dth time=%f\n", i, time);
     }
 
     hipblasLtMatmulDescDestroy(operationDesc);

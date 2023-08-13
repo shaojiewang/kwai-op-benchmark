@@ -104,6 +104,10 @@ void call_rocBLAS(TGemm<T>& gemm, T* h_C_rocblas) {
   device_check_error(hipEventCreate(&start));
   device_check_error(hipEventCreate(&stop));
 
+    // warm up
+    ROCBLAS_CHECK(rocblasGemmEx(handle, gemm));
+
+
   float total_time = 0.0f;
   for (int i = 0; i < NUM_ITERATIONS; ++i) {
     // device_check_error(hipMemset(d_zero, 0, zero_size));
