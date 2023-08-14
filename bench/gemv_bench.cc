@@ -3,6 +3,7 @@
 
 #include "csrc/utils/device_mem_utils.h"
 #include "csrc/utils/data_generator.h"
+#include "csrc/utils/data_verification.h"
 
 #include "csrc/ops/gemv/rocblas_traits.h"
 #include "csrc/ops/gemv/hipblaslt_traits.h"
@@ -54,6 +55,8 @@ int main(int argc, char* argv[]){
     TGemm<half> gemm_fp16(M, N, K, d_A_fp16, d_B_fp16, d_C_fp16, transA, transB);
     call_rocBLAS(gemm_fp16, h_C_rocblas_fp16);
     call_hipblaslt(gemm_fp16, h_C_hipblaslt_fp16);
+
+    verify(h_C_hipblaslt_fp16, h_C_rocblas_fp16, M * N, "hipblaslt");
 
 
     deviceFree(d_A_fp16);

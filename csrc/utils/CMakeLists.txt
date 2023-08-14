@@ -5,3 +5,5 @@ if(USE_HIPRAND)
 target_link_libraries(data_generator hiprand)
 endif()
 
+add_library(data_verification STATIC data_verification.cc)
+
