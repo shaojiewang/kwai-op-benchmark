@@ -99,8 +99,8 @@ struct TGemm
         ldB = transB ? k : n;
         ldC = n;
 
-        alpha = T(1.f);
-        beta = T(0.f);
+        alpha = 1.f;
+        beta = 0.f;
     }
 };
 

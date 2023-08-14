@@ -40,21 +40,21 @@ int main(int argc, char* argv[]){
 
     half* h_C_rocblas_fp16 = (half*)malloc(size_C * sizeof(half));
     if (h_C_rocblas_fp16 == nullptr) {
-      printf("h_C_blaslt_fp16 is nullptr. \n");
+      printf("h_C_rocblas_fp16 is nullptr. \n");
     } else {
       memset(h_C_rocblas_fp16, 0, size_C * sizeof(half));
     }
 
     half* h_C_hipblaslt_fp16 = (half*)malloc(size_C * sizeof(half));
     if (h_C_hipblaslt_fp16 == nullptr) {
-      printf("h_C_blaslt_fp16 is nullptr. \n");
+      printf("h_C_hipblaslt_fp16 is nullptr. \n");
     } else {
       memset(h_C_hipblaslt_fp16, 0, size_C * sizeof(half));
     }
 
     TGemm<half> gemm_fp16(M, N, K, d_A_fp16, d_B_fp16, d_C_fp16, transA, transB);
     call_rocBLAS(gemm_fp16, h_C_rocblas_fp16);
-    call_hipblaslt(gemm_fp16, h_C_hipblaslt_fp16);
+    call_hipblaslt<half>(gemm_fp16, h_C_hipblaslt_fp16);
 
     verify(h_C_hipblaslt_fp16, h_C_rocblas_fp16, M * N, "hipblaslt");
 

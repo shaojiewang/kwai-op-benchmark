@@ -34,8 +34,8 @@ void call_hipblaslt(TGemm<T>& gemm, T* h_C_hipblaslt) {
     hipblasDatatype_t       scaleType = HIPBLAS_R_32F;
     hipblasLtComputeType_t  computeType;
 
-    half h_alpha = gemm.alpha;
-    half h_beta = gemm.beta;
+    float h_alpha = 1.0;
+    float h_beta = 0.0;
 
     const void* alpha = reinterpret_cast<void*>(&h_alpha);
     const void* beta  = reinterpret_cast<void*>(&h_beta);
@@ -143,7 +143,7 @@ void call_hipblaslt(TGemm<T>& gemm, T* h_C_hipblaslt) {
         float time = 0.0f;
         device_check_error(hipEventElapsedTime(&time, start, stop));
         total_time += time;
-        printf("%dth time=%f\n", i, time);
+        // printf("%dth time=%f\n", i, time);
     }
 
     hipblasLtMatmulDescDestroy(operationDesc);

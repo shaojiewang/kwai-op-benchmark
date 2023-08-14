@@ -1,7 +1,7 @@
 #include "data_verification.h"
 
 template<typename T>
-void verify(const T* lhs, const T* rhs, int size, const std::string& str) {
+void verify(const T* lhs, const T* rhs, size_t size, const std::string& str) {
   double max_err = std::numeric_limits<double>::min();
   double rtol = 1e-3;
   double atol = 1e-5;
@@ -20,7 +20,7 @@ void verify(const T* lhs, const T* rhs, int size, const std::string& str) {
         max_err_out = out;
       }
       errors++;
-      // if (errors <= 16) printf("i: %d    %f %f\n", i, ref, out);
+      if (errors <= 16) printf("i: %d    %f %f\n", i, ref, out);
     }
   }
   std::cout << "    Errors: "<< errors
@@ -30,6 +30,6 @@ void verify(const T* lhs, const T* rhs, int size, const std::string& str) {
             << " out: " << max_err_out << std::endl;
 }
 
-template void verify<float>(const float* lhs, const float* rhs, int size, const std::string& str);
-template void verify<half>(const half* lhs, const half* rhs, int size, const std::string& str);
+template void verify<float>(const float* lhs, const float* rhs, size_t size, const std::string& str);
+template void verify<half>(const half* lhs, const half* rhs, size_t size, const std::string& str);
 

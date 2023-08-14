@@ -21,7 +21,7 @@ void deviceFree(T*& ptr){
 #if defined(__HIPCC__)
         device_check_error(hipFree(ptr));
 #endif
-        ptr == nullptr;
+        ptr = nullptr;
     }
 }
 
