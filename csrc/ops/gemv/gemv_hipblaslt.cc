@@ -11,7 +11,7 @@
 #include "rocblas_traits.h"
 #include "hipblaslt_traits.h"
 
-#define NUM_ITERATIONS 4
+#define NUM_ITERATIONS 11
 
 template <typename T>
 void call_hipblaslt(TGemm<T>& gemm, T* h_C_hipblaslt) {
@@ -116,9 +116,10 @@ void call_hipblaslt(TGemm<T>& gemm, T* h_C_hipblaslt) {
     }
     
     float total_time = 0.0f;
+    device_check_error(hipEventRecord(start));
     for (int i = 0; i < NUM_ITERATIONS; ++i) {
         // device_check_error(hipMemset(d_zero, 0, zero_size));
-        device_check_error(hipEventRecord(start));
+        //  device_check_error(hipEventRecord(start));
 
         HIPBLASLT_CHECK(hipblasLtMatmul(handle,
                        operationDesc,
@@ -137,14 +138,11 @@ void call_hipblaslt(TGemm<T>& gemm, T* h_C_hipblaslt) {
                        workspaceSize,
                        0));
 
-        device_check_error(hipEventRecord(stop));       
-        device_check_error(hipEventSynchronize(stop));
-
-        float time = 0.0f;
-        device_check_error(hipEventElapsedTime(&time, start, stop));
-        total_time += time;
-        // printf("%dth time=%f\n", i, time);
     }
+    device_check_error(hipEventRecord(stop));       
+    device_check_error(hipEventSynchronize(stop));
+
+    device_check_error(hipEventElapsedTime(&total_time, start, stop));
 
     hipblasLtMatmulDescDestroy(operationDesc);
     hipblasLtMatrixLayoutDestroy(Adesc);

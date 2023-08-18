@@ -34,6 +34,7 @@ endif()
 message("CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 
 set(ROCM_INCLUDES
+    /opt/rocm/include/rccl
 if(USE_HIPRAND)
     /opt/rocm/hiprand/include
     /opt/rocm/rocrand/include
