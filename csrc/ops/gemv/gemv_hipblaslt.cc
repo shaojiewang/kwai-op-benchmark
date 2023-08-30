@@ -84,44 +84,48 @@ void call_hipblaslt(TGemm<T>& gemm, T* h_C_hipblaslt) {
                                                      heuristic_result,
                                                      &ret_algo_count));
 
-    assert(ret_algo_count > 0); 
-    algo = heuristic_result[0].algo;
+    assert(ret_algo_count > 0);
+
     hipblasLtMatmulPreferenceDestroy(pref); 
 
     hipEvent_t start, stop;
-    device_check_error(hipEventCreate(&start));
-    device_check_error(hipEventCreate(&stop));
-
-    printf("m=%d, n=%d, k=%d, lda=%d, ldb=%d, ldc=%d, wss=%d\n",
-        m, n, k, lda, ldb, ldc, workspaceSize);
-
-    // warm up
-    for(int i = 0; i < NUM_ITERATIONS; i++){
-        HIPBLASLT_CHECK(hipblasLtMatmul(handle,
-                       operationDesc,
-                       alpha,
-                       gemm.B,
-                       Bdesc,
-                       gemm.A,
-                       Adesc,
-                       beta,
-                       gemm.C,
-                       Cdesc,
-                       gemm.C,
-                       Cdesc,
-                       &algo,
-                       workSpace,
-                       workspaceSize,
-                       0));
-    }
+        
     
-    float total_time = 0.0f;
-    device_check_error(hipEventRecord(start));
-    for (int i = 0; i < NUM_ITERATIONS; ++i) {
-        // device_check_error(hipMemset(d_zero, 0, zero_size));
-        //  device_check_error(hipEventRecord(start));
+    float min_time = FLT_MAX;
+    int min_algo = -1;
 
-        HIPBLASLT_CHECK(hipblasLtMatmul(handle,
+    for(int i_algo = 0; i_algo < ret_algo_count; i_algo++)
+    { 
+        algo = heuristic_result[i_algo].algo;
+        device_check_error(hipEventCreate(&start));
+        device_check_error(hipEventCreate(&stop));
+
+
+        // warm up
+        for(int i = 0; i < NUM_ITERATIONS; i++){
+            HIPBLASLT_CHECK(hipblasLtMatmul(handle,
+                       operationDesc,
+                       alpha,
+                       gemm.B,
+                       Bdesc,
+                       gemm.A,
+                       Adesc,
+                       beta,
+                       gemm.C,
+                       Cdesc,
+                       gemm.C,
+                       Cdesc,
+                       &algo,
+                       workSpace,
+                       workspaceSize,
+                       0));
+        }
+    
+        float total_time = 0.0f;
+        device_check_error(hipEventRecord(start));
+        for (int i = 0; i < NUM_ITERATIONS; ++i) {
+
+            HIPBLASLT_CHECK(hipblasLtMatmul(handle,
                        operationDesc,
                        alpha,
                        gemm.B,
@@ -138,24 +142,36 @@ void call_hipblaslt(TGemm<T>& gemm, T* h_C_hipblaslt) {
                        workspaceSize,
                        0));
 
+        }
+        device_check_error(hipEventRecord(stop));       
+        device_check_error(hipEventSynchronize(stop));
+
+        device_check_error(hipEventElapsedTime(&total_time, start, stop));
+        if(min_time > total_time){
+            min_time = total_time;
+            min_algo = i_algo;
+        }
+        // printf("%dth algo, hipblasLt time:  %3.4f ms \n", i_algo, total_time / NUM_ITERATIONS);
     }
-    device_check_error(hipEventRecord(stop));       
-    device_check_error(hipEventSynchronize(stop));
 
-    device_check_error(hipEventElapsedTime(&total_time, start, stop));
 
+    float gflop = static_cast<float>(m) * static_cast<float>(n) * static_cast<float>(k) * 2 / 1024.0 / 1024.0 / 1024.0;
+    printf("m=%d, n=%d, k=%d, lda=%d, ldb=%d, ldc=%d, wss=%d\n",
+            m, n, k, lda, ldb, ldc, workspaceSize);
+    double tflops = gflop / (min_time / NUM_ITERATIONS);
+    printf("hipblasLt time: %dth algo, %3.4f ms, gflop: %3.4lf, TFLOPS: %3.4lf tflops \n", min_algo, min_time / NUM_ITERATIONS, gflop, tflops);
+
+    device_check_error(hipEventDestroy(start));
+    device_check_error(hipEventDestroy(stop));
     hipblasLtMatmulDescDestroy(operationDesc);
     hipblasLtMatrixLayoutDestroy(Adesc);
     hipblasLtMatrixLayoutDestroy(Bdesc);
     hipblasLtMatrixLayoutDestroy(Cdesc);
 
-    printf("hipblasLt time:  %3.4f ms \n", total_time / NUM_ITERATIONS);
 
     device_check_error(hipMemcpy(h_C_hipblaslt, gemm.C, gemm.elemC * sizeof(T), hipMemcpyDeviceToHost));
     device_check_error(hipDeviceSynchronize());
 
-    device_check_error(hipEventDestroy(start));
-    device_check_error(hipEventDestroy(stop));
     deviceFree(workSpace);
 }
 

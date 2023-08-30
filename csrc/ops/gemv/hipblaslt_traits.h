@@ -19,7 +19,7 @@
 constexpr const size_t kHipBlasLtMaxWorkSpaceSizeInBytes = 32 * 1024 * 1024;
 // We only keep one heuristic result here. Note that for tuned input sizes, the first result
 // will be the most performant one; but in untuned cases, this is not guaranteed.
-constexpr const int kHeuristicResultCount = 1;
+constexpr const int kHeuristicResultCount = 100;
 
 enum ActivationType {
   NONE = 0,

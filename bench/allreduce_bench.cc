@@ -182,7 +182,7 @@ int main(int argc, char* argv[])
   NCCLCHECK(ncclGroupStart());
   for (int i=0; i<nDev; i++ ) {
       device_set(i, nDev);
-      NCCLCHECK(ncclCommInitRankMulti(&comms[i], nDev, id, i, i));
+      NCCLCHECK(ncclCommInitRank(&comms[i], nDev, id, i));
   }
   NCCLCHECK(ncclGroupEnd());
 
